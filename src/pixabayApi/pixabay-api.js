@@ -24,11 +24,12 @@ async function getApiResponse(searchTerm) {
       images.totalHits / requestParameters.per_page
     );
 
-    if (requestParameters.page === pagesAmount) {
+    if (requestParameters.page === pagesAmount || pagesAmount === 0) {
       requestParameters.page = 1;
     } else {
       requestParameters.page += 1;
     }
+
     return images;
   } catch (error) {
     console.log(error);

@@ -7,17 +7,28 @@ const modalRoot = document.querySelector('#modal-root');
 
 class Modal extends Component {
   componentDidMount() {
-    window.addEventListener('keydown', event => {
-      if (event.code === 'Escape') {
-        this.props.onClose();
-      }
-    });
+    window.addEventListener('keydown', this.closeModal);
   }
 
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.closeModal);
+  }
+
+  closeModal = ({ code, currentTarget, target }) => {
+    if (code === 'Escape' || currentTarget === target) {
+      this.props.onClose();
+    }
+  };
+
   render() {
+    const {
+      props: { children },
+      closeModal,
+    } = this;
+
     return createPortal(
-      <div className={css.overlay} onClick={this.props.onClose}>
-        <div className={css.modal}>{this.props.children}</div>
+      <div className={css.overlay} onClick={closeModal}>
+        <div className={css.modal}>{children}</div>
       </div>,
       modalRoot
     );

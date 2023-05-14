@@ -1,10 +1,11 @@
 import { Component } from 'react';
-import { InfinitySpin } from 'react-loader-spinner';
 import { getApiResponse, requestParameters } from 'pixabayApi/pixabay-api';
 import Searchbar from './Searchbar';
 import ImageGallery from './ImageGallery';
 import Button from './Button';
 import Modal from './Modal';
+import Image from './Image';
+import Loader from './Loader';
 import css from './App.module.css';
 
 class App extends Component {
@@ -16,7 +17,7 @@ class App extends Component {
     isModalOpen: false,
   };
 
-  async componentDidUpdate(prevProps, prevState) {
+  async componentDidUpdate(_, prevState) {
     const {
       state: { searchString },
       updateGallery,
@@ -40,7 +41,12 @@ class App extends Component {
     this.setState({ isLoading: true });
     try {
       getApiResponse(searchString).then(response => {
-        this.setState({ gallery: [...this.state.gallery, ...response.hits] });
+        if (response.totalHits === 0) {
+          alert('Images by your request did not found');
+          return;
+        } else {
+          this.setState({ gallery: [...this.state.gallery, ...response.hits] });
+        }
       });
     } catch (error) {
       this.setState({ error });
@@ -55,18 +61,20 @@ class App extends Component {
     }
   };
 
-  openModal = () => {};
+  openModal = ({ largeImageURL, tags }) => {
+    this.setState({ isModalOpen: true });
+    this.setState({ largeImageURL, tags });
+  };
 
   closeModal = () => {
     this.setState({ isModalOpen: false });
+    delete this.state.largeImageURL;
+    delete this.state.tags;
   };
-
-  //Where does it must to be?
-  image = {};
 
   render() {
     const {
-      state: { gallery, isLoading, isModalOpen },
+      state: { gallery, isLoading, isModalOpen, largeImageURL, tags },
       getSearchString,
       loadNextPage,
       openModal,
@@ -78,23 +86,17 @@ class App extends Component {
         <Searchbar onSubmit={getSearchString} />
 
         {isLoading && requestParameters.page === 1 ? (
-          <InfinitySpin width="200" color="#4fa94d" />
+          <Loader />
         ) : (
           <ImageGallery gallery={gallery} onClick={openModal} />
         )}
 
         {requestParameters.page !== 1 &&
-          (isLoading ? (
-            <InfinitySpin width="200" color="#4fa94d" />
-          ) : (
-            <Button onClick={loadNextPage} />
-          ))}
+          (isLoading ? <Loader /> : <Button onClick={loadNextPage} />)}
 
         {isModalOpen && (
           <Modal onClose={closeModal}>
-            <button type="button" onClick={closeModal}>
-              Close modal
-            </button>
+            <Image URL={largeImageURL} tags={tags} />
           </Modal>
         )}
       </div>
