@@ -28,17 +28,18 @@ class App extends Component {
       this.setState({ gallery: [] });
 
       if (searchString !== '') {
+        this.setState({ isLoading: true });
         updateGallery(this.state.searchString);
       }
     }
   }
 
   loadNextPage = () => {
+    this.setState({ isLoading: true });
     this.updateGallery(this.state.searchString);
   };
 
   updateGallery = searchString => {
-    this.setState({ isLoading: true });
     try {
       getApiResponse(searchString).then(response => {
         if (response.totalHits === 0) {
@@ -81,6 +82,8 @@ class App extends Component {
       closeModal,
     } = this;
 
+    console.log(isLoading); //
+
     return (
       <div className={css.app}>
         <Searchbar onSubmit={getSearchString} />
@@ -88,7 +91,9 @@ class App extends Component {
         {isLoading && requestParameters.page === 1 ? (
           <Loader />
         ) : (
-          <ImageGallery gallery={gallery} onClick={openModal} />
+          gallery.length > 0 && (
+            <ImageGallery gallery={gallery} onClick={openModal} />
+          )
         )}
 
         {requestParameters.page !== 1 &&
