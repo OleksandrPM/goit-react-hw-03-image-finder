@@ -43,7 +43,7 @@ class App extends Component {
     try {
       getApiResponse(searchString).then(response => {
         if (response.totalHits === 0) {
-          alert('Images by your request did not found');
+          alert(`Images by your request "${searchString}" did not found`);
           return;
         } else {
           this.setState({ gallery: [...this.state.gallery, ...response.hits] });
@@ -59,6 +59,8 @@ class App extends Component {
   getSearchString = value => {
     if (this.state.searchString !== value.searchString) {
       this.setState({ searchString: value.searchString });
+    } else {
+      alert(`You are actually looking at "${value.searchString}" pictures`);
     }
   };
 
